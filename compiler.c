@@ -52,6 +52,7 @@ void _generate(action_type action, va_list argp) {
       break;
     }
     case PRINT:
+    case RET:
     {
       ins -> param1 = va_arg(argp, unsigned long);
       break;
@@ -81,7 +82,6 @@ void _generate(action_type action, va_list argp) {
       ins -> param1 = func.param_num;
       break;
     }
-    case RET:
     case POP:
     case ERR:
     {

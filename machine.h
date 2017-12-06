@@ -41,6 +41,17 @@ typedef enum {
   EQ, NEQ
 } algo_enum;
 
+#define ACT_LOG_SIZE 3
+/**
+ * --low addr end--
+ * (return unit with chosen type)
+ * (parameter units)
+ * dynamic link (previous base)  <-- new base
+ * return address in the instruction stack
+ * parameter count
+ * --high addr end--
+ */
+
 void init_machine();
 
 #define MACHINE_H

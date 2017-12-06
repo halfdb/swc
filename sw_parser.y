@@ -255,13 +255,21 @@ str_arg_list:
 return_stat:
   RETSYM expression
   {
-    // TODO disinguish void and return
-    $$ = generate_instruction(RET);
+    func_item *func = func_table + current_scope;
+    if (!check_type(func->ret_type, $2.type)) {
+      // TODO
+    }
+    $$ = generate_instruction(RET, 1);
     dprint("return expression\n");
   }
   |
   RETSYM
   {
+    func_item *func = func_table + current_scope;
+    if (func->ret_type != VOID) {
+      // TODO
+    }
+    $$ = generate_instruction(RET, 0);
     dprint("return\n");
   }
 ;
