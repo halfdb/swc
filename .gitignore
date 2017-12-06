@@ -4,7 +4,6 @@ parser.*
 lex.c
 
 swc
-*.sw
 out.txt
 
 test.sh

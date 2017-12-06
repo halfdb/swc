@@ -89,7 +89,7 @@ func_decl_list:
   func_decl func_decl_list
 ;
 func_decl:
-  type ident LPASYM param_list RPASYM
+  type ident LPASYM param_list RPASYM LBRSYM 
   {
     func_item func = {
       .param_num = $4.param_num,
@@ -104,11 +104,12 @@ func_decl:
     func.addr = generate_instruction(INIT, func);
     unsigned long scope_num = add_func(func);
     current_scope = scope_num;
+    $<func>$ = func;
   }
-  LBRSYM func_body RBRSYM
+  func_body RBRSYM
   { current_scope = 0; dprint("func decl finished\n"); }
   |
-  type ident LPASYM RPASYM
+  type ident LPASYM RPASYM LBRSYM 
   {
     func_item func = {
       .param_num = 0,
@@ -118,8 +119,9 @@ func_decl:
     func.addr = generate_instruction(INIT, func);
     unsigned long scope_num = add_func(func);
     current_scope = scope_num;
+    $<func>$ = func;
   }
-  LBRSYM func_body RBRSYM
+  func_body RBRSYM
   { current_scope = 0; dprint("func decl finished\n"); }
 ;
 param_list:
@@ -147,7 +149,13 @@ param_list:
 func_body:
   var_decl_list statement_list
   {
-    generate_instruction(ERR); // TODO void return type
+    switch ($<func>0.ret_type) {
+      case VOID:
+      generate_instruction(RET);
+      break;
+      default:
+      generate_instruction(ERR);
+    }
   }
 ;
 
@@ -247,10 +255,15 @@ str_arg_list:
 return_stat:
   RETSYM expression
   {
+    // TODO disinguish void and return
+    $$ = generate_instruction(RET);
     dprint("return expression\n");
   }
   |
-  RETSYM { dprint("return\n"); }
+  RETSYM
+  {
+    dprint("return\n");
+  }
 ;
 assign_stat:
   ident ASSNSYM expression
@@ -268,6 +281,7 @@ if_stat:
   |
   if_pt1 ELSESYM LBRSYM statement_list RBRSYM
   {
+    // TODO make "if" statements skip "else" statements
     $$ = $1;
     dprint("if..else..\n");
   }
@@ -349,6 +363,7 @@ call_stat:
     func_item func = $<func>4;
     $$.type = func.ret_type;
     $$.addr = $<addr>2;
+    // TODO add CALL instruction
     generate_instruction(JUMP, func.addr);
     dprint("call function(arglist)\n");
   }

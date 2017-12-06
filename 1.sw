@@ -20,12 +20,13 @@ int f(float f1, float f3, float f4) {
   }
 }
 float g(int i, bool b) {
-  if b {
+  if i < j && b {
     return i;
   } else {
     return 3.14;
   }
 }
+i = 1;
 j = 4;
 call g(j * 4, 2 < 3);
 sum = 0;
