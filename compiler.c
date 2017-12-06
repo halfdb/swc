@@ -13,6 +13,7 @@ static void _generate(action_type action, va_list argp);
 
 void init_compiler() {
   ins_stack = (instruction*) malloc(INS_STACK_SIZE * sizeof(instruction));
+  memset(ins_stack, 0, INS_STACK_SIZE * sizeof(instruction));
 }
 
 /*void move_ins_top(int addr) {

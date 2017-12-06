@@ -101,8 +101,8 @@ func_decl:
     if (f != NULL) {
       // TODO redefinition
     }
+    func.addr = generate_instruction(INIT, func);
     unsigned long scope_num = add_func(func);
-    dprint("func added, no=%lu\n", scope_num);
     current_scope = scope_num;
   }
   LBRSYM func_body RBRSYM
@@ -115,8 +115,8 @@ func_decl:
       .name = $2.name,
       .ret_type = $1.type
     };
+    func.addr = generate_instruction(INIT, func);
     unsigned long scope_num = add_func(func);
-    dprint("added, no=%lu\n", scope_num);
     current_scope = scope_num;
   }
   LBRSYM func_body RBRSYM
@@ -349,7 +349,7 @@ call_stat:
     func_item func = $<func>4;
     $$.type = func.ret_type;
     $$.addr = $<addr>2;
-    generate_instruction(INIT, func);
+    generate_instruction(JUMP, func.addr);
     dprint("call function(arglist)\n");
   }
 ;

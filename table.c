@@ -53,6 +53,7 @@ unsigned long add_func(func_item func) {
 
   func.name = strdup(func.name);
   func_table[func_count] = func;
+  dprint("added, name=%s, param count=%lu, return type=%d", func.name, func.param_num, func.ret_type);
   return func_count++;
 }
 
