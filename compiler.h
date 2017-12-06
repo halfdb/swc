@@ -37,7 +37,7 @@ unsigned long ins_top;
  * ALGO:
  * ..., algo_enum algorithm
  * JUMP, JNZ, JZ:
- * ..., int addr
+ * ..., unsigned long addr
  * INIT:
  * ..., func_item func
  * RET, POP, ERR:

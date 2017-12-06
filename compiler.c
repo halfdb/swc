@@ -78,7 +78,6 @@ void _generate(action_type action, va_list argp) {
     {
       func_item func = va_arg(argp, func_item);
       ins -> param1 = func.param_num;
-      ins -> param2 = func.addr;
       break;
     }
     case RET:
@@ -168,7 +167,7 @@ void output_readable(const char *filename) {
       fprintf(file, "jz %lu\n", ins->param1);
       break;
       case INIT:
-      fprintf(file, "init param count:%lu call:%lu\n", ins->param1, ins->param2);
+      fprintf(file, "init param count:%lu\n", ins->param1);
       break;
       case RET:
       fprintf(file, "ret\n");
