@@ -1,0 +1,1 @@
+void yyerror(char const *str);
