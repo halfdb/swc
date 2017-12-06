@@ -31,7 +31,6 @@ void close_table();
 /* tables */
 /* variable table */
 //#define VAR_TABLE_SIZE ((1<<16)-1)
-//var_list var_table;
 
 /* function table */
 #define FUNC_TABLE_SIZE ((1<<24)-1) // by items

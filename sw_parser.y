@@ -285,13 +285,18 @@ if_stat:
   {
     $$ = $1;
     dprint("if..\n");
+    change_instruction(ins_top-1, JUMP, ins_top);
   }
   |
-  if_pt1 ELSESYM LBRSYM statement_list RBRSYM
+  if_pt1 ELSESYM
   {
-    // TODO make "if" statements skip "else" statements
-    $$ = $1;
+    $<addr>$ = ins_top - 1;
     dprint("if..else..\n");
+  }
+  LBRSYM statement_list RBRSYM
+  {
+    $$ = $1;
+    change_instruction($<addr>3, JUMP, ins_top);
   }
 ;
 if_pt1:
@@ -302,6 +307,7 @@ if_pt1:
   LBRSYM statement_list RBRSYM
   {
     $$ = $2.addr;
+    generate_instruction(JUMP, 0);
     change_instruction($<addr>3, JZ, ins_top);
   }
 ;
