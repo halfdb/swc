@@ -53,6 +53,9 @@ param_list first_param = NULL;
 %%
 program:
   var_decl_list func_decl_list statement_list
+  {
+    // TODO go to main
+  }
 ;
 var_decl_list:
   %empty
@@ -377,8 +380,7 @@ call_stat:
     func_item func = $<func>4;
     $$.type = func.ret_type;
     $$.addr = $<addr>2;
-    // TODO add CALL instruction
-    generate_instruction(JUMP, func.addr);
+    generate_instruction(CALL, func);
     dprint("call function(arglist)\n");
   }
 ;

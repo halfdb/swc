@@ -8,6 +8,7 @@
 
 typedef enum {
   INIT,
+  CALL,
   RET,
   JUMP,
   JNZ, // jump if true

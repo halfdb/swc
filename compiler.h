@@ -25,7 +25,7 @@ unsigned long ins_top;
  * ..., algo_enum algorithm
  * JUMP, JNZ, JZ:
  * ..., unsigned long addr
- * INIT:
+ * INIT, CALL:
  * ..., func_item func
  * POP, ERR:
  * ... (NONE)

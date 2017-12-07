@@ -77,9 +77,11 @@ void _generate(action_type action, va_list argp) {
       break;
     }
     case INIT:
+    case CALL:
     {
       func_item func = va_arg(argp, func_item);
       ins -> param1 = func.param_num;
+      ins -> param2 = func.addr;
       break;
     }
     case POP:
@@ -169,6 +171,9 @@ void output_readable(const char *filename) {
       break;
       case INIT:
       fprintf(file, "init param count:%lu\n", ins->param1);
+      break;
+      case CALL:
+      fprintf(file, "call addr:%lu\n", ins->param2);
       break;
       case RET:
       fprintf(file, "ret\n");
