@@ -1,10 +1,9 @@
 %{
 #include <stdio.h>
 #include <string.h>
-#include "types.h"
-#include "table.h"
+#include "config.h"
 #include "machine.h"
-#include "compiler.h"
+#include "table.h"
 #include "parser.h"
 extern void yyerror(char const*);
 

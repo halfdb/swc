@@ -1,10 +1,33 @@
 #ifndef MACHINE_H
-#include "types.h"
+#include "config.h"
 
 /* data stack */
-
-
 #define DATA_STACK_SIZE ((1<<24)-1)
+
+/* types */
+typedef enum {
+  VOID,
+  INT,
+  FLOAT,
+  BOOL,
+  STR
+} type_enum;
+
+#define INT_SIZE 4
+#define FLOAT_SIZE 4
+#define BOOL_SIZE 1
+#define MAX_SIZE 4
+
+typedef struct {
+  type_enum type;
+  union {
+    long int li;
+    float fl;
+    char bo;
+    char* str;
+    unsigned long addr;
+  } value;
+} data_item;
 
 typedef enum {
   INIT,

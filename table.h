@@ -1,5 +1,6 @@
 #ifndef TABLE_H
-#include "types.h"
+#include "config.h"
+#include "machine.h"
 /* global variables */
 unsigned long current_scope;
 

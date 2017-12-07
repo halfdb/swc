@@ -1,26 +1,27 @@
-%{
-#include "types.h"
-#include "table.h"
-#include "machine.h"
-#include "compiler.h"
+%code requires{
+  #include "config.h"
+  #include "machine.h"
+  #include "table.h"
+  
+  int yylex();
+  void yyerror(char const *);
+  
+  typedef struct {
+    unsigned long addr;
+    type_enum type;
+  } expr_item;
+}
 
-extern int yylex();
-void yyerror(char const *);
+%code {
+  #include "compiler.h"
 
-char *type_names[] = {
-  "VOID",
-  "INT",
-  "FLOAT",
-  "BOOL",
-  "STR"
-};
+  static param_list first_param = NULL;
+  static char check_type(type_enum t1, type_enum t2);
+}
 
-char check_type(type_enum t1, type_enum t2);
-//type_enum merge_type(type_enum t1, type_enum t2);
+%code provides{
+}
 
-param_list first_param = NULL;
-
-%}
 %token ADDSYM SUBSYM MULSYM DIVSYM MODSYM ASSNSYM
 %token ANDSYM ORSYM NOTSYM TRUESYM FALSESYM RELSYM
 %token INTSYM BOOLSYM FLOATSYM VOIDSYM
@@ -52,9 +53,13 @@ param_list first_param = NULL;
 
 %%
 program:
+  {
+    $<addr>$ = generate_instruction(JUMP, 0);
+  }
   var_decl_list func_decl_list statement_list
   {
-    // TODO go to main
+    change_instruction($<addr>1, JUMP, $4);
+    generate_instruction(RET, 0);
   }
 ;
 var_decl_list:
@@ -598,14 +603,12 @@ char check_type(type_enum t1, type_enum t2) {
     return 1;
   } else {
     // TODO type error
-    dprint("type error!\n");    
+    dprint("type error!\n");
     return 0;
   }
 }
 
 void yyinit() {
-  init_table();
-  init_compiler();
 }
 
 void yyclose() {

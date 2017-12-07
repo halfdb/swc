@@ -3,11 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "compiler.h"
-#include "machine.h"
-
-extern void yyinit();
-extern void yyclose();
-extern int yyparse();
+#include "parser.h"
 
 void yyerror(char const * str) {
   fprintf(stderr, "%s", str);
@@ -64,7 +60,8 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  yyinit();
+  init_table();
+  init_compiler();
   int result = yyparse();
   if (result) {
 #ifdef DEBUG
@@ -85,7 +82,7 @@ int main(int argc, char* argv[]) {
   if (run_flag) {
     // TODO run
   }
-  yyclose();
+  // close
 
   return result;
 }
