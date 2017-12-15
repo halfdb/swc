@@ -15,7 +15,6 @@
 %code {
   #include "compiler.h"
 
-  static param_list first_param = NULL;
   static char check_type(type_enum t1, type_enum t2);
 }
 
@@ -49,7 +48,7 @@
 %type <addr> if_stat if_pt1 for_stat while_stat str_arg_list
 %type <expr> call_stat expression
 %type <expr> bool_expr bool_term bool_factor alg_expr alg_term alg_factor
-%type <flag> arg_list
+%type <func> arg_list
 
 %%
 program:
@@ -409,6 +408,9 @@ call_stat:
   }
   arg_list RPASYM
   {
+    if ($5.params->next != NULL) {
+      // TODO too few args
+    }
     func_item func = $<func>4;
     $$.type = func.ret_type;
     long unsigned addr = $<addr>2;
@@ -425,6 +427,9 @@ call_stat:
     if (NULL == func) {
       // function does not exist
       // TODO
+    }
+    if (func.param_num != 0) {
+      // TODO too few args
     }
     long unsigned addr = 0;
     if (func -> ret_type != VOID) {
@@ -443,8 +448,11 @@ call_stat:
 arg_list:
   expression
   {
-    first_param = $<func>0.params;
-    if (!check_type($1.type, first_param->type)) {
+    $$.params = $<func>0.params;
+    if ($$.params == NULL) {
+      // TODO too many args
+    }
+    if (!check_type($1.type, $$.params->type)) {
       // TODO type error
     }
     dprint("expression(arg)\n");
@@ -452,8 +460,11 @@ arg_list:
   |
   arg_list COMMASYM expression
   {
-    first_param = first_param -> next;
-    if (!check_type($3.type, first_param->type)) {
+    $$.params = $1.params -> next;
+    if ($$.params == NULL) {
+      // TODO too many args
+    }
+    if (!check_type($3.type, $$.params->type)) {
       // TODO
     }
     dprint("arg..., expression\n");
