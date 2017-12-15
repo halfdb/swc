@@ -58,7 +58,6 @@ program:
   }
   var_decl_list func_decl_list statement_list
   {
-    // TODO fix jump addr error
     change_instruction($<addr>1, JUMP, $4);
     generate_instruction(RET, 0);
   }
@@ -311,7 +310,7 @@ assign_stat:
   ident ASSNSYM expression
   {
     dprint("assign\n");
-    generate_instruction(STORE, $1.locator);
+    $$ = generate_instruction(STORE, $1.locator);
   }
 ;
 if_stat:
