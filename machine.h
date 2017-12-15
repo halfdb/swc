@@ -78,6 +78,9 @@ typedef enum {
  */
 
 void init_machine();
+void start_program(instruction *instructions, void *static_area);
+void interpret(instruction ins, void *static_area);
+void runtime_error(char* error);
 
 #define MACHINE_H
 #endif

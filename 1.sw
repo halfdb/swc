@@ -1,6 +1,6 @@
 int i;
 int j;
-int sum;
+float sum;
 void test(){
   int a;
   a = 1;
@@ -26,11 +26,12 @@ float g(int i, bool b) {
     return 3.14;
   }
 }
+print(1, 3.4, true, "t");
 i = 1;
 j = 4;
 call g(j * 4, 2 < 3);
 sum = 0;
 for i in 1...10 {
-  sum = sum + 1;
+  sum = sum + i;
 }
 print("sum is ", sum);

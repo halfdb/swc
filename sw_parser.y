@@ -368,6 +368,10 @@ for_stat:
    * ALGO >=
    * JNZ #END
    * ... (statement_list)
+   * LOAD var
+   * PUSH 1
+   * ALGO +
+   * STORE var
    * JUMP #LABEL
    */
   FORSYM AIDENTSYM INSYM alg_expr
@@ -385,6 +389,11 @@ for_stat:
   LBRSYM statement_list RBRSYM
   {
     $$ = $4.addr;
+    generate_instruction(LOAD, $2.locator);
+    data_item item = { .type=INT, .value.li=1 };
+    generate_instruction(PUSH, add_const(item));
+    generate_instruction(ALGO, ADD);
+    generate_instruction(STORE, $2.locator);
     unsigned long addr = generate_instruction(JUMP, $<addr>5);
     change_instruction($<addr>8, JNZ, addr+1);
   }

@@ -17,10 +17,10 @@ NUMBER  {DIGIT}+
 IDENT   ({LETTER}|_)({LETTER}|{DIGIT}|_)*
 
 %%
-[\t ]               { }
+[\t\n ]             { }
 "/*"(.|\n)*"*/"     { }
 "//".*$             { }
-\".*\"              {
+\"[^\"]*\"          {
                       char *text = strdup(yytext + 1);
                       text[strlen(text) - 1] = '\0';
                       yylval.data.value.str = text;

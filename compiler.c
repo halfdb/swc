@@ -89,6 +89,7 @@ void _generate(action_type action, va_list argp) {
     {
       func_item func = va_arg(argp, func_item);
       ins -> param1 = func.addr;
+      ins -> param2 = func.param_num;
       break;
     }
     case POP:

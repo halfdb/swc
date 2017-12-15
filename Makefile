@@ -1,4 +1,4 @@
-swc: parser.c lex.c table.c compiler.c interface.c
+swc: parser.c lex.c table.c compiler.c interface.c machine.c
 	gcc machine.c lex.c parser.c table.c compiler.c interface.c -g -o swc
 
 parser.c parser.h: sw_parser.y config.h machine.h table.h

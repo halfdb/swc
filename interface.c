@@ -80,9 +80,10 @@ int main(int argc, char* argv[]) {
   }
 
   if (run_flag) {
-    // TODO run
+    init_machine();
+    start_program(ins_stack, const_table);
   }
-  // close
+  // TODO close
 
   return result;
 }

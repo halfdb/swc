@@ -1,5 +1,9 @@
 #ifndef CONFIG_H
-#define DEBUG
+//#define DEBUG
+
+#ifndef NULL
+#define NULL ((void*)0)
+#endif
 
 // define dprint = debug print
 #ifdef DEBUG
