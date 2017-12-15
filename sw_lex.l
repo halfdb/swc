@@ -21,9 +21,11 @@ IDENT   ({LETTER}|_)({LETTER}|{DIGIT}|_)*
 "/*"(.|\n)*"*/"     { }
 "//".*$             { }
 \".*\"              {
-                      // TODO remove quotation
-                      yylval.data.value.str = strdup(yytext);
-                      yylval.data.type = STR; return STRSYM;
+                      char *text = strdup(yytext + 1);
+                      text[strlen(text) - 1] = '\0';
+                      yylval.data.value.str = text;
+                      yylval.data.type = STR;
+                      return STRSYM;
                     }
 ;|；                { return SMCLSYM; }
 [=!！]=             {

@@ -428,7 +428,7 @@ call_stat:
       // function does not exist
       // TODO
     }
-    if (func.param_num != 0) {
+    if (func->param_num != 0) {
       // TODO too few args
     }
     long unsigned addr = 0;
