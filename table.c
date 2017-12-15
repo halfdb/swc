@@ -36,7 +36,6 @@ void add_var(var_node var) {
   memcpy(pvar, &var, sizeof(var_node));
   pvar -> name = strdup(pvar -> name);
 
-  // TODO set var_no to include params.
   var_locator locator = {
     .scope = current_scope,
     .var_no = func->param_num + func->var_num++
