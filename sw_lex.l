@@ -20,7 +20,11 @@ IDENT   ({LETTER}|_)({LETTER}|{DIGIT}|_)*
 [\t ]               { }
 "/*"(.|\n)*"*/"     { }
 "//".*$             { }
-\".*\"              { yylval.data.value.str = strdup(yytext); yylval.data.type = STR; return STRSYM; }
+\".*\"              {
+                      // TODO remove quotation
+                      yylval.data.value.str = strdup(yytext);
+                      yylval.data.type = STR; return STRSYM;
+                    }
 ;|；                { return SMCLSYM; }
 [=!！]=             {
                       if (yytext[0] == '=') {

@@ -16,7 +16,7 @@ typedef enum {
 #define INT_SIZE 4
 #define FLOAT_SIZE 4
 #define BOOL_SIZE 1
-#define MAX_SIZE 4
+#define MAX_TYPE_SIZE 4
 
 typedef struct {
   type_enum type;
@@ -65,7 +65,7 @@ typedef enum {
   EQ, NEQ
 } algo_enum;
 
-#define ACT_LOG_SIZE 3
+#define ACT_LOG_SIZE 4
 /**
  * --low addr end--
  * (return unit with chosen type)
@@ -73,6 +73,7 @@ typedef enum {
  * dynamic link (previous base)  <-- new base
  * return address in the instruction stack
  * parameter count
+ * var type list addr
  * --high addr end--
  */
 

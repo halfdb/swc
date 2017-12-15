@@ -58,6 +58,7 @@ program:
   }
   var_decl_list func_decl_list statement_list
   {
+    // TODO fix jump addr error
     change_instruction($<addr>1, JUMP, $4);
     generate_instruction(RET, 0);
   }
@@ -101,7 +102,7 @@ func_decl:
   {
     func_item func = {
       .param_num = $4.param_num,
-      .params = first_param,
+      .params = $4.params,
       .name = $2.name,
       .ret_type = $1.type
     };
@@ -109,13 +110,23 @@ func_decl:
     if (f != NULL) {
       // TODO redefinition
     }
-    func.addr = generate_instruction(INIT, func);
+    func.addr = generate_instruction(ERR);
     unsigned long scope_num = add_func(func);
+    param_node *param = func.params;
+    while (param != NULL) {
+      param->locator.scope = scope_num;
+      param = param->next;
+    }
     current_scope = scope_num;
     $<func>$ = func;
   }
   func_body RBRSYM
-  { current_scope = 0; dprint("func decl finished\n"); }
+  {
+    current_scope = 0;
+    func_item *func = find_func($<func>7.name);
+    change_instruction($<func>7.addr, INIT, *func);
+    dprint("func decl finished\n");
+   }
   |
   type ident LPASYM RPASYM LBRSYM 
   {
@@ -124,13 +135,18 @@ func_decl:
       .name = $2.name,
       .ret_type = $1.type
     };
-    func.addr = generate_instruction(INIT, func);
+    func.addr = generate_instruction(ERR);
     unsigned long scope_num = add_func(func);
     current_scope = scope_num;
     $<func>$ = func;
   }
   func_body RBRSYM
-  { current_scope = 0; dprint("func decl finished\n"); }
+  {
+    current_scope = 0;
+    func_item *func = find_func($<func>6.name);
+    change_instruction($<func>6.addr, INIT, *func);
+    dprint("func decl finished\n");
+  }
 ;
 param_list:
   type ident
@@ -140,18 +156,21 @@ param_list:
     $$.params -> name = $2.name;
     $$.params -> type = $1.type;
     $$.params -> next = NULL;
-    first_param = $$.params;
-    dprint("param %lu: name=%s, type=%u\n", $$.param_num - 1, $$.params->name, $$.params->type);
+    $$.params -> locator.var_no = 0;
+    // first_param = $$.params;
+    dprint("param %d: name=%s, type=%u\n", 0, $$.params->name, $$.params->type);
   }
   |
   param_list COMMASYM type ident
   {
-    $$.param_num = $1.param_num + 1;
     $$.params = (param_list) malloc(sizeof(param_node));
     $$.params -> name = $4.name;
     $$.params -> type = $3.type;
-    $1.params -> next = $$.params; // the list starts with the right first param
-    dprint("param %lu: name=%s, type=%u\n", $1.param_num, $$.params->name, $$.params->type);
+    $$.params -> locator.var_no = $1.param_num;
+    $1.params -> next = $$.params; // the list starts with the left first param
+    $1.param_num += 1;
+    $$ = $1;
+    dprint("param %lu: name=%s, type=%u\n", $1.param_num - 1, $$.params->name, $$.params->type);
   }
 ;
 func_body:
@@ -201,7 +220,14 @@ line_statement:
       generate_instruction(POP);
     }
   }
-  |assign_stat|read_stat|print_stat|return_stat
+  |
+  assign_stat { $$ = $1; }
+  |
+  read_stat { $$ = $1; }
+  |
+  print_stat { $$ = $1; }
+  |
+  return_stat { $$ = $1; }
 ;
 
 read_stat:
@@ -376,6 +402,8 @@ call_stat:
       data_item dummy = { .type = func->ret_type };
       const_item const_dummy = add_const(dummy);
       $<addr>2 = generate_instruction(PUSH, const_dummy); // reuse $2 to keep the starting addr
+    } else {
+      $<addr>2 = 0;
     }
     $<func>$ = *func;
     dprint("arg of %s\n", $<func>$.name);
@@ -384,17 +412,36 @@ call_stat:
   {
     func_item func = $<func>4;
     $$.type = func.ret_type;
-    $$.addr = $<addr>2;
-    generate_instruction(CALL, func);
+    long unsigned addr = $<addr>2;
+    long unsigned t = generate_instruction(CALL, func);
+    $$.addr = addr ? addr : t;
+    dprint("call function(arglist)\n");
+  }
+  |
+  CALLSYM AIDENTSYM LPASYM RPASYM
+  {
+    func_item *func = find_func($2.name);
+    free($2.name);
+
+    if (NULL == func) {
+      // function does not exist
+      // TODO
+    }
+    long unsigned addr = 0;
+    if (func -> ret_type != VOID) {
+      // make a unit for the return value
+      data_item dummy = { .type = func->ret_type };
+      const_item const_dummy = add_const(dummy);
+      addr = generate_instruction(PUSH, const_dummy); // reuse $2 to keep the starting addr
+    }
+    dprint("calling %s without args\n", $<func>$.name);
+    $$.type = func->ret_type;
+    long unsigned t = generate_instruction(CALL, *func);
+    $$.addr = addr ? addr : t;
     dprint("call function(arglist)\n");
   }
 ;
 arg_list:
-  %empty
-  {
-    $$ = 1;
-  }
-  |
   expression
   {
     first_param = $<func>0.params;
@@ -406,11 +453,6 @@ arg_list:
   |
   arg_list COMMASYM expression
   {
-    if ($1) {
-      // indicating %empty
-      // TODO syntax error
-      first_param = $<func>0.params;
-    }
     first_param = first_param -> next;
     if (!check_type($3.type, first_param->type)) {
       // TODO

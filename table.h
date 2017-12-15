@@ -50,7 +50,7 @@ func_item *find_func(char *name);
 /* static table */
 typedef struct {
   type_enum type;
-  char value[MAX_SIZE];
+  char value[MAX_TYPE_SIZE];
 } const_item;
 
 #define CONST_TABLE_SIZE ((1<<24)-1) // by bytes
@@ -59,6 +59,9 @@ unsigned long const_size;
 
 // add a new const and return its const_item
 const_item add_const(data_item item);
+
+// log var types in const area
+unsigned long log_func(func_item func);
 
 #define TABLE_H
 #endif

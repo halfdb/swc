@@ -61,7 +61,7 @@ void _generate(action_type action, va_list argp) {
     {
       const_item item = va_arg(argp, const_item);
       ins -> param1 = item.type;
-      memcpy(&ins->param2, item.value, MAX_SIZE);
+      memcpy(&ins->param2, item.value, MAX_TYPE_SIZE);
       break;
     }
     case ALGO:
@@ -77,11 +77,18 @@ void _generate(action_type action, va_list argp) {
       break;
     }
     case INIT:
+    {
+      func_item func = va_arg(argp, func_item);
+      ins -> param1 = func.var_num;
+      if (ins->param1 != 0) {
+        ins -> param2 = log_func(func);
+      }
+      break;
+    }
     case CALL:
     {
       func_item func = va_arg(argp, func_item);
-      ins -> param1 = func.param_num;
-      ins -> param2 = func.addr;
+      ins -> param1 = func.addr;
       break;
     }
     case POP:
@@ -170,10 +177,18 @@ void output_readable(const char *filename) {
       fprintf(file, "jz %lu\n", ins->param1);
       break;
       case INIT:
-      fprintf(file, "init param count:%lu\n", ins->param1);
+      {
+        fprintf(file, "init var count:%lu ", ins->param1);
+        type_enum *types = (type_enum*) (const_table + ins -> param2);
+        int i = 0;
+        for (i=0; i<ins->param1; i++) {
+          fprintf(file, "var%d: type %d ", i, types[i]);
+        }
+        fprintf(file, "\n");
+      }
       break;
       case CALL:
-      fprintf(file, "call addr:%lu\n", ins->param2);
+      fprintf(file, "call addr:%lu\n", ins->param1);
       break;
       case RET:
       fprintf(file, "ret\n");

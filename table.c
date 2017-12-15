@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
 #include "table.h"
@@ -36,7 +37,10 @@ void add_var(var_node var) {
   pvar -> name = strdup(pvar -> name);
 
   // TODO set var_no to include params.
-  var_locator locator = { .scope = current_scope, .var_no = func->var_num++ };
+  var_locator locator = {
+    .scope = current_scope,
+    .var_no = func->param_num + func->var_num++
+  };
   pvar->locator = locator;
   pvar->next = func->vars;
   func->vars = pvar;
@@ -129,6 +133,7 @@ const_item add_const(data_item item) {
       yyerror("Too many strings.\n");
       return ret;
     }
+    memcpy(ret.value, &const_size, sizeof(INT_SIZE));
     const_size += size;
     memcpy(addr, item.value.str, size);
     break;
@@ -136,6 +141,21 @@ const_item add_const(data_item item) {
     default:
     size = 0;
     dprint("adding illegal const!\n");
+  }
+  return ret;
+}
+
+unsigned long log_func(func_item func) {
+  int ret = const_size;
+  int size = sizeof(type_enum);
+  var_list vars;
+  for (vars=func.vars; vars!=NULL; vars=vars->next) {
+    memcpy(const_table + const_size, &vars->type, size);
+    const_size += size;
+  }
+  if (const_size - ret != func.var_num * size) {
+    yyerror("Table error.\n");
+    exit(1);
   }
   return ret;
 }
