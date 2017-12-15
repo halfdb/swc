@@ -46,8 +46,8 @@
 %type <addr> statement_list line_statement block_statement
 %type <addr> assign_stat read_stat print_stat return_stat
 %type <addr> if_stat if_pt1 for_stat while_stat str_arg_list
-%type <expr> call_stat expression
-%type <expr> bool_expr bool_term bool_factor alg_expr alg_term alg_factor
+%type <expr> call_stat expression alg_expr bool_expr
+%type <expr> bool_term bool_factor alg_term alg_factor
 %type <func> arg_list
 
 %%
@@ -55,9 +55,13 @@ program:
   {
     $<addr>$ = generate_instruction(JUMP, 0);
   }
-  var_decl_list func_decl_list statement_list
+  var_decl_list func_decl_list
   {
-    change_instruction($<addr>1, JUMP, $4);
+    $<addr>$ = generate_instruction(INIT, func_table[0]);
+  }
+  statement_list
+  {
+    change_instruction($<addr>1, JUMP, $<addr>4);
     generate_instruction(RET, 0);
   }
 ;
