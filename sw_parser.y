@@ -1,4 +1,5 @@
 %code requires{
+  #include "stdio.h"
   #include "config.h"
   #include "machine.h"
   #include "table.h"
@@ -19,6 +20,7 @@
 }
 
 %code provides{
+  extern FILE *yyin;
 }
 
 %token ADDSYM SUBSYM MULSYM DIVSYM MODSYM ASSNSYM
@@ -236,6 +238,7 @@ read_stat:
   READSYM LPASYM ident RPASYM
   {
     $$ = generate_instruction(READ, $3.locator);
+    free($3.name);
   }
 ;
 print_stat:
@@ -314,6 +317,7 @@ assign_stat:
   {
     dprint("assign\n");
     $$ = generate_instruction(STORE, $1.locator);
+    free($1.name);
   }
 ;
 if_stat:
@@ -671,12 +675,4 @@ char check_type(type_enum t1, type_enum t2) {
     dprint("type error!\n");
     return 0;
   }
-}
-
-void yyinit() {
-}
-
-void yyclose() {
-  close_compiler();
-  close_table();
 }

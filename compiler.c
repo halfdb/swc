@@ -16,10 +16,6 @@ void init_compiler() {
   memset(ins_stack, 0, INS_STACK_SIZE * sizeof(instruction));
 }
 
-/*void move_ins_top(int addr) {
-  ins_top = addr;
-}*/
-
 void change_instruction(unsigned long addr, action_type action, ...) {
   unsigned long t = ins_top;
   ins_top = addr;
@@ -161,7 +157,7 @@ void output_readable(const char *filename) {
         break;
         default:
         dprint("unknown type while outputing\n");
-        yyerror("Unknown error.\n");
+        yyerror("Unknown error.");
         exit(1);
       }
       break;
@@ -202,13 +198,16 @@ void output_readable(const char *filename) {
       break;
       default:
       dprint("unknown instruction while outputing\n");
-      yyerror("Unknown error.\n");
+      yyerror("Unknown error.");
       exit(1);
     }
   }
   fclose(file);
 }
 
-void close_compiler() {
-  free(ins_stack);
+void close_compiler(char clean) {
+  if (clean) {
+    free(ins_stack);
+    ins_stack = NULL;
+  }
 }

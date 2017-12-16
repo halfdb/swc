@@ -1,3 +1,4 @@
+int n;
 int f(int n) {
   if n==0 {
     return 0;
@@ -5,5 +6,6 @@ int f(int n) {
     return call f(n-1) + 1;
   }
 }
-
-print (call f(4));
+print("input the n");
+read(n);
+print (call f(n));

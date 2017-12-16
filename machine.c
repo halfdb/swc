@@ -72,6 +72,9 @@ void interpret(instruction ins, void *static_area) {
         }
       }
       stack_top += var_num + 1;
+      if (stack_top > DATA_STACK_SIZE) {
+        runtime_error("stack overflow");
+      }
       break;
     }
     case CALL:
@@ -93,6 +96,9 @@ void interpret(instruction ins, void *static_area) {
       top++;
 
       stack_top = top;
+      if (stack_top > DATA_STACK_SIZE) {
+        runtime_error("stack overflow");
+      }
       return;
     }
     case RET:
@@ -114,8 +120,9 @@ void interpret(instruction ins, void *static_area) {
       return;
     }
     case JZ:
-    if (data_stack[stack_top - 1].type == BOOL) {
-      if (data_stack[stack_top - 1].value.bo == 1) {
+    stack_top--;
+    if (data_stack[stack_top].type == BOOL) {
+      if (data_stack[stack_top].value.bo == 1) {
         break;
       }
     } else {
@@ -124,8 +131,9 @@ void interpret(instruction ins, void *static_area) {
     instruction_pointer = ins.param1;
     return;
     case JNZ:
-    if (data_stack[stack_top - 1].type == BOOL) {
-      if (data_stack[stack_top - 1].value.bo != 1) {
+    stack_top--;
+    if (data_stack[stack_top].type == BOOL) {
+      if (data_stack[stack_top].value.bo != 1) {
         break;
       }
     } else {
@@ -138,6 +146,9 @@ void interpret(instruction ins, void *static_area) {
     return;
     case LOAD:
     data_stack[stack_top++] = *_locate(ins.param1, ins.param2);
+    if (stack_top > DATA_STACK_SIZE) {
+      runtime_error("stack overflow");
+    }
     break;
     case STORE:
     stack_top--;
@@ -147,6 +158,9 @@ void interpret(instruction ins, void *static_area) {
     memcpy(&((data_stack + stack_top)->value), &ins.param2, MAX_TYPE_SIZE);
     data_stack[stack_top].type = ins.param1;
     stack_top++;
+    if (stack_top > DATA_STACK_SIZE) {
+      runtime_error("stack overflow");
+    }
     break;
     case POP:
     stack_top--;
@@ -469,4 +483,5 @@ void runtime_error(char* error) {
 
 void close_machine() {
   free(data_stack);
+  data_stack = NULL;
 }

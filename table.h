@@ -27,7 +27,7 @@ typedef struct {
 } func_item;
 
 void init_table();
-void close_table();
+void close_table(char clean);
 
 /* tables */
 /* variable table */

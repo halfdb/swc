@@ -24,8 +24,33 @@ void init_table() {
   const_table = (void*) malloc(CONST_TABLE_SIZE);
 }
 
-void close_table() {
-  // TODO
+void close_table(char clean) {
+  if (clean) {
+    free(const_table);
+    const_table = NULL;
+  }
+  int i = 1;
+  func_item *func;
+  for (func = func_table + i; i<func_count; func = func_table + i++) {
+    param_list params = func->params;
+    while (params) {
+      free(params->name);
+      void *t = params;
+      params = params->next;
+      free(t);
+    }
+    var_list vars = func->vars;
+    while (vars) {
+      free(vars->name);
+      void *t = vars;
+      vars = vars->next;
+      free(t);
+    }
+    free(func->name);
+  }
+  func_count = 0;
+  free(func_table);
+  func_table = NULL;
 }
 
 void add_var(var_node var) {
@@ -34,7 +59,6 @@ void add_var(var_node var) {
   func_item *func = func_table + current_scope;
   var_node *pvar = (var_node*) malloc(sizeof(var_node));
   memcpy(pvar, &var, sizeof(var_node));
-  pvar -> name = strdup(pvar -> name);
 
   var_locator locator = {
     .scope = current_scope,
@@ -52,10 +76,9 @@ unsigned long add_func(func_item func) {
   dprint("add to func table\n");
 
   if (func_count >= FUNC_TABLE_SIZE) {
-    yyerror("Too many functions.\n");
+    yyerror("Too many functions.");
   }
 
-  func.name = strdup(func.name);
   func_table[func_count] = func;
   dprint("added, name=%s, param count=%lu, return type=%d", func.name, func.param_num, func.ret_type);
   return func_count++;
@@ -129,7 +152,7 @@ const_item add_const(data_item item) {
     case STR:
     size = strlen(item.value.str) + 1;
     if (const_size + size > CONST_TABLE_SIZE) {
-      yyerror("Too many strings.\n");
+      yyerror("Too many strings.");
       return ret;
     }
     memcpy(ret.value, &const_size, sizeof(INT_SIZE));
@@ -153,7 +176,7 @@ unsigned long log_func(func_item func) {
     const_size += size;
   }
   if (const_size - ret != func.var_num * size) {
-    yyerror("Table error.\n");
+    yyerror("Table error.");
     exit(1);
   }
   return ret;

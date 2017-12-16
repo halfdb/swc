@@ -6,7 +6,7 @@
 #include "table.h"
 
 void init_compiler();
-void close_compiler();
+void close_compiler(char clean);
 
 // instruction stack
 #define INS_STACK_SIZE (1<<24)

@@ -13,10 +13,10 @@ typedef enum {
   STR
 } type_enum;
 
-#define INT_SIZE 4
-#define FLOAT_SIZE 4
+#define INT_SIZE sizeof(long)
+#define FLOAT_SIZE sizeof(float)
 #define BOOL_SIZE 1
-#define MAX_TYPE_SIZE 4
+#define MAX_TYPE_SIZE (INT_SIZE > FLOAT_SIZE ? INT_SIZE : FLOAT_SIZE)
 
 typedef struct {
   type_enum type;
@@ -78,6 +78,7 @@ typedef enum {
  */
 
 void init_machine();
+void close_machine();
 void start_program(instruction *instructions, void *static_area);
 void interpret(instruction ins, void *static_area);
 void runtime_error(char* error);

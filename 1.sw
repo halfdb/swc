@@ -26,12 +26,13 @@ float g(int i, bool b) {
     return 3.14;
   }
 }
-print(1, 3.4, true, "t");
+//print(1, 3.4, true, "t");
 i = 1;
 j = 4;
 call g(j * 4, 2 < 3);
 sum = 0;
-for i in 1...10 {
+for i in 1...10.5 {
   sum = sum + i;
 }
-print("sum is ", sum);
+i = sum;
+print("sum is ", i);

@@ -113,7 +113,7 @@ IDENT   ({LETTER}|_)({LETTER}|{DIGIT}|_)*
                     }
 {NUMBER}\.{NUMBER}  { yylval.data.value.fl = atof(yytext); yylval.data.type = FLOAT; return FNUMSYM; }
 {NUMBER}            { yylval.data.value.li = atoi(yytext); yylval.data.type = INT; return INUMSYM; }
-.                   { yyerror("Unknow character.\n"); yyerror(yytext); yyerror("\n"); return 0; }
+.                   { yyerror("Unknow character."); yyerror(yytext); yyerror(""); return 0; }
 
 %%
 

@@ -4,17 +4,18 @@
 #include <stdio.h>
 #include "compiler.h"
 #include "parser.h"
+#include "machine.h"
 
 void yyerror(char const * str) {
-  fprintf(stderr, "%s", str);
+  fprintf(stderr, "%s\n", str);
 }
 
 void usage(char *argv0) {
   fprintf(stderr, "Usage: %s [-i] [-c [out_file]] [-r [out_file]] file\n", argv0);
-  fprintf(stderr, "\t-i\tInteractive mode. File input will be ignored.\n");
+  fprintf(stderr, "\t-i\t\tInteractive mode. File input will be ignored.\n");
   fprintf(stderr, "\t-c [out_file]\tCompile to instructions.\n");
   fprintf(stderr, "\t-r [out_file]\tOutput human-readable instructions.\n");
-  fprintf(stderr, "\t-n\tDo not run the program.\n");
+  fprintf(stderr, "\t-n\t\tDo not run the program.\n");
   exit(1);  
 }
 
@@ -53,8 +54,13 @@ int main(int argc, char* argv[]) {
   if (!interactive_flag) {
     if (optind + 1 == argc) {
       char *in_name = argv[optind];
-      int file = open(in_name, O_RDONLY);
-      dup2(file, STDIN_FILENO);
+      // int file = open(in_name, O_RDONLY);
+      // dup2(file, STDIN_FILENO);
+      yyin = fopen(in_name, "r");
+      if (yyin == NULL) {
+        yyerror("unable to open file");
+        exit(1);
+      }
     } else {
       usage(argv[0]);
     }
@@ -80,10 +86,16 @@ int main(int argc, char* argv[]) {
   }
 
   if (run_flag) {
+    close_table(0);
+    close_compiler(0);
     init_machine();
     start_program(ins_stack, const_table);
+    close_table(1);
+    close_compiler(1);
+    close_machine();
+  } else {
+    close_table(1);
+    close_compiler(1);
   }
-  // TODO close
-
-  return result;
+  return 0;
 }
