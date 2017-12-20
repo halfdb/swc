@@ -29,7 +29,7 @@ void init_machine() {
   status = INITIALIZED;
 }
 
-void start_program(instruction* instructions, void *static_area) {
+int start_program(instruction* instructions, void *static_area) {
   if (status != INITIALIZED) {
     dprint("not intialized!!\n");
   }
@@ -44,15 +44,22 @@ void start_program(instruction* instructions, void *static_area) {
     interpret(instructions[instruction_pointer], static_area);
   }
   
+  int result;
   switch (status) {
     case FINISHED:
+    result = 0;
     break;
     case ERROR:
+    runtime_error("error");
+    result = 1;
+    break;
     default:
+    result = -1;
     runtime_error("unknown");
     break;
   }
   dprint("program finished\n");
+  return result;
 }
 
 void interpret(instruction ins, void *static_area) {

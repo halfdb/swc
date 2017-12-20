@@ -10,6 +10,7 @@ extern void yyerror(char const*);
 %}
 
 %option noyywrap
+%option yylineno
 
 LETTER  [a-zA-Z]
 DIGIT   [0-9]
@@ -77,7 +78,7 @@ IDENT   ({LETTER}|_)({LETTER}|{DIGIT}|_)*
 "while"             { return WHILESYM; }
 "for"               { return FORSYM; }
 "in"                { return INSYM; }
-"..."               { return ELLIPSYM; }
+"..."|".."          { return ELLIPSYM; }
 "void"              { yylval.var.type = VOID; return VOIDSYM; }
 "int"               { yylval.var.type = INT; return INTSYM; }
 "bool"              {
@@ -113,7 +114,7 @@ IDENT   ({LETTER}|_)({LETTER}|{DIGIT}|_)*
                     }
 {NUMBER}\.{NUMBER}  { yylval.data.value.fl = atof(yytext); yylval.data.type = FLOAT; return FNUMSYM; }
 {NUMBER}            { yylval.data.value.li = atoi(yytext); yylval.data.type = INT; return INUMSYM; }
-.                   { yyerror("Unknow character."); yyerror(yytext); yyerror(""); return 0; }
+.                   { yyerror("Unknow character."); return 0; }
 
 %%
 

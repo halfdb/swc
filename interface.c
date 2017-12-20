@@ -7,7 +7,9 @@
 #include "machine.h"
 
 void yyerror(char const * str) {
-  fprintf(stderr, "%s\n", str);
+  errors++;
+  fprintf(stderr, "error while parsing line %d\n", yylineno);
+  fprintf(stderr, "%s\n\n", str);
 }
 
 void usage(char *argv0) {
@@ -54,11 +56,9 @@ int main(int argc, char* argv[]) {
   if (!interactive_flag) {
     if (optind + 1 == argc) {
       char *in_name = argv[optind];
-      // int file = open(in_name, O_RDONLY);
-      // dup2(file, STDIN_FILENO);
       yyin = fopen(in_name, "r");
       if (yyin == NULL) {
-        yyerror("unable to open file");
+        fprintf(stderr, "unable to open file\n");
         exit(1);
       }
     } else {
@@ -69,11 +69,12 @@ int main(int argc, char* argv[]) {
   init_table();
   init_compiler();
   int result = yyparse();
+  result = result || errors;
   if (result) {
 #ifdef DEBUG
     result = *(int*)NULL;
 #else
-    yyerror("Error during parsing.");
+    printf("Error during parsing.\n");
     exit(1);
 #endif
   }
@@ -88,14 +89,14 @@ int main(int argc, char* argv[]) {
   if (run_flag) {
     close_table(0);
     close_compiler(0);
+
     init_machine();
-    start_program(ins_stack, const_table);
-    close_table(1);
-    close_compiler(1);
+    result = start_program(ins_stack, const_table);
     close_machine();
-  } else {
-    close_table(1);
-    close_compiler(1);
   }
-  return 0;
+
+  close_table(1);
+  close_compiler(1);
+
+  return result;
 }

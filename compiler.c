@@ -188,7 +188,7 @@ void output_readable(const char *filename) {
       fprintf(file, "call addr:%lu\n", ins->param1);
       break;
       case RET:
-      fprintf(file, "ret\n");
+      fprintf(file, "ret count:%lu\n", ins->param1);
       break;
       case POP:
       fprintf(file, "pop\n");

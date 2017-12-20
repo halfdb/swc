@@ -17,11 +17,16 @@
   #include "compiler.h"
 
   static char check_type(type_enum t1, type_enum t2);
+  int errors = 0;
 }
 
 %code provides{
   extern FILE *yyin;
+  extern int errors;
+  extern int yylineno;
 }
+
+%locations
 
 %token ADDSYM SUBSYM MULSYM DIVSYM MODSYM ASSNSYM
 %token ANDSYM ORSYM NOTSYM TRUESYM FALSESYM RELSYM
@@ -65,19 +70,32 @@ program:
   {
     change_instruction($<addr>1, JUMP, $<addr>4);
     generate_instruction(RET, 0);
+
+    if (errors) {
+      YYABORT;
+  }
   }
 ;
 var_decl_list:
   %empty
   |
   var_decl_list var_decl SMCLSYM
+  |
+  var_decl_list var_decl error
+  {
+    yyerror("semicolon expected");
+  }
+  |
+  var_decl_list error SMCLSYM
+  {
+    yyerror("unknown statement");
+  }
 ;
 var_decl:
   type ident
   {
-    if ($2.type != VOID) {
-      // indicating redefinition
-      // TODO redefinition error
+    if ($2.type != VOID && current_scope == $2.locator.scope) {
+      yyerror("the variable has been declared already");
     } else {
       var_node i = { .name = $2.name, .type=$1.type };
       add_var(i);
@@ -112,7 +130,7 @@ func_decl:
     };
     func_item *f = find_func(func.name);
     if (f != NULL) {
-      // TODO redefinition
+      yyerror("the function has been declared already");
     }
     func.addr = generate_instruction(ERR);
     unsigned long scope_num = add_func(func);
@@ -176,13 +194,25 @@ param_list:
     $$ = $1;
     dprint("param %lu: name=%s, type=%u\n", $1.param_num - 1, $$.params->name, $$.params->type);
   }
+  |
+  error COMMASYM type ident
+  {
+    yyerror("unknown type while parsing parameters");
+
+    $$.param_num = 1;
+    $$.params = (param_list) malloc(sizeof(param_node));
+    $$.params -> name = $4.name;
+    $$.params -> type = $3.type;
+    $$.params -> next = NULL;
+    $$.params -> locator.var_no = 0;
+  }
 ;
 func_body:
   var_decl_list statement_list
   {
     switch ($<func>0.ret_type) {
       case VOID:
-      generate_instruction(RET);
+      generate_instruction(RET, 0);
       break;
       default:
       generate_instruction(ERR);
@@ -232,13 +262,23 @@ line_statement:
   print_stat { $$ = $1; }
   |
   return_stat { $$ = $1; }
+  |
+  expression { $$ = $1.addr; yyerror("expression may not be a statement"); generate_instruction(POP); }
 ;
 
 read_stat:
   READSYM LPASYM ident RPASYM
   {
+    if ($3.type == VOID) {
+      yyerror("the variable has not been declared yet");
+    }
     $$ = generate_instruction(READ, $3.locator);
     free($3.name);
+  }
+  |
+  READSYM error
+  {
+    yyerror("illegal read statment");
   }
 ;
 print_stat:
@@ -257,6 +297,11 @@ print_stat:
   {
     dprint("print w/o args\n");
     $$ = generate_instruction(PRINT, 0);
+  }
+  |
+  PRINTSYM error
+  {
+    yyerror("illegal print statement");
   }
 ;
 str_arg_list:
@@ -296,9 +341,9 @@ return_stat:
   {
     func_item *func = func_table + current_scope;
     if (!check_type(func->ret_type, $2.type)) {
-      // TODO
+      yyerror("returning incompatible type");
     }
-    $$ = generate_instruction(RET, 1);
+    $$ = generate_instruction(RET, 1LU);
     dprint("return expression\n");
   }
   |
@@ -306,10 +351,15 @@ return_stat:
   {
     func_item *func = func_table + current_scope;
     if (func->ret_type != VOID) {
-      // TODO
+      yyerror("a value must be returned");
     }
-    $$ = generate_instruction(RET, 0);
+    $$ = generate_instruction(RET, 0LU);
     dprint("return\n");
+  }
+  |
+  RETSYM error
+  {
+    yyerror("illegal return statement");
   }
 ;
 assign_stat:
@@ -350,6 +400,11 @@ if_pt1:
     generate_instruction(JUMP, 0);
     change_instruction($<addr>3, JZ, ins_top);
   }
+  |
+  IFSYM error LBRSYM statement_list RBRSYM
+  {
+    yyerror("illegal condition");
+  }
 ;
 while_stat:
   WHILESYM bool_expr
@@ -361,6 +416,11 @@ while_stat:
     $$ = $2.addr;
     unsigned long addr = generate_instruction(JUMP, $2.addr);
     change_instruction($<addr>3, JZ, addr+1);
+  }
+  |
+  WHILESYM error LBRSYM statement_list RBRSYM
+  {
+    yyerror("illegal condition");
   }
 ;
 for_stat:
@@ -380,6 +440,9 @@ for_stat:
    */
   FORSYM AIDENTSYM INSYM alg_expr
   {
+    if (VOID == $2.type) {
+      yyerror("the variable has not been declared yet");
+    }
     generate_instruction(STORE, $2.locator);
     $<addr>$ = generate_instruction(LOAD, $2.locator);
 
@@ -401,6 +464,15 @@ for_stat:
     unsigned long addr = generate_instruction(JUMP, $<addr>5);
     change_instruction($<addr>8, JNZ, addr+1);
   }
+  |
+  FORSYM AIDENTSYM INSYM error LBRSYM
+  {
+    yyerror("illegal range");
+  }
+  statement_list RBRSYM
+  {
+    $$ = 0;
+  }
 ;
 call_stat:
   CALLSYM AIDENTSYM LPASYM
@@ -409,8 +481,7 @@ call_stat:
     free($2.name);
 
     if (NULL == func) {
-      // function does not exist
-      // TODO
+      yyerror("function not declared yet");
     }
     if (func -> ret_type != VOID) {
       // make a unit for the return value
@@ -426,7 +497,7 @@ call_stat:
   arg_list RPASYM
   {
     if ($5.params->next != NULL) {
-      // TODO too few args
+      yyerror("passing too few arguments");
     }
     func_item func = $<func>4;
     $$.type = func.ret_type;
@@ -442,11 +513,10 @@ call_stat:
     free($2.name);
 
     if (NULL == func) {
-      // function does not exist
-      // TODO
+      yyerror("function not declared yet");
     }
     if (func->param_num != 0) {
-      // TODO too few args
+      yyerror("passing too few arguments");
     }
     long unsigned addr = 0;
     if (func -> ret_type != VOID) {
@@ -461,16 +531,21 @@ call_stat:
     $$.addr = addr ? addr : t;
     dprint("call function(arglist)\n");
   }
+  |
+  CALLSYM error
+  {
+    yyerror("illegal call statement");
+  }
 ;
 arg_list:
   expression
   {
     $$.params = $<func>0.params;
     if ($$.params == NULL) {
-      // TODO too many args
+      yyerror("passing too many arguments");
     }
     if (!check_type($1.type, $$.params->type)) {
-      // TODO type error
+      yyerror("type error while passing arguments");
     }
     dprint("expression(arg)\n");
   }
@@ -479,10 +554,10 @@ arg_list:
   {
     $$.params = $1.params -> next;
     if ($$.params == NULL) {
-      // TODO too many args
+      yyerror("passing too many arguments");
     }
     if (!check_type($3.type, $$.params->type)) {
-      // TODO
+      yyerror("type error while passing arguments");
     }
     dprint("arg..., expression\n");
   }
@@ -521,6 +596,7 @@ bool_factor:
   alg_expr RELSYM alg_expr
   {
     $$ = $1;
+    $$.type = BOOL;
     generate_instruction(ALGO, (algo_enum) $2.value.li);
     dprint("expression REL expression\n");
   }
@@ -546,7 +622,7 @@ bool_factor:
   BIDENTSYM
   {
     if (VOID == $1.type) {
-      // TODO undefined
+      yyerror("the variable has not been declared yet");
     }
     $$.addr = generate_instruction(LOAD, $1.locator);
     $$.type = BOOL;
@@ -565,6 +641,12 @@ bool_factor:
   {
     $$ = $2;
     dprint("( bexp )\n");
+  }
+  |
+  call_stat
+  {
+    $$ = $1;
+    dprint("call stat as bool\n");
   }
 ;
 alg_expr:
@@ -628,7 +710,7 @@ alg_factor:
   AIDENTSYM
   {
     if (VOID == $1.type) {
-      // TODO undefined
+      yyerror("the variable has not been declared yet");
     }
     $$.addr = generate_instruction(LOAD, $1.locator);
     $$.type = $1.type;
@@ -663,6 +745,11 @@ alg_factor:
     $$ = $2;
     dprint("( alg_expr )\n");
   }
+  |
+  LPASYM error RPASYM
+  {
+    yyerror("illegal expression");
+  }
 %%
 
 char check_type(type_enum t1, type_enum t2) {
@@ -671,7 +758,6 @@ char check_type(type_enum t1, type_enum t2) {
   } else if ((t1 == FLOAT || t1 == INT) && (t2 == FLOAT || t2 == INT)) {
     return 1;
   } else {
-    // TODO type error
     dprint("type error!\n");
     return 0;
   }

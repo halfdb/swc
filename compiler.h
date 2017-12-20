@@ -1,6 +1,5 @@
 #ifndef COMPILER_H
 #include <stdarg.h>
-//#include <stdio.h>
 #include "config.h"
 #include "machine.h"
 #include "table.h"
@@ -36,8 +35,8 @@ void change_instruction(unsigned long addr, action_type action, ...);
 void output(const char *filename);
 #define CONST_SIZE_BYTES 4
 #define ACTION_BYTES 1
-#define PARAM1_BYTES 4
-#define PARAM2_BYTES 4
+#define PARAM1_BYTES 8
+#define PARAM2_BYTES 8
 #define INSTRUCTION_BYTES (ACTION_BYTES + PARAM1_BYTES + PARAM2_BYTES)
 
 void output_readable(const char *filename);
