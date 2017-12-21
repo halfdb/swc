@@ -169,6 +169,16 @@ func_decl:
     change_instruction($<func>6.addr, INIT, *func);
     dprint("func decl finished\n");
   }
+  |
+  type ident LPASYM RPASYM error
+  {
+    yyerror("illegal function body");
+  }
+  |
+  type ident LPASYM param_list RPASYM error
+  {
+    yyerror("illegal function body");
+  }
 ;
 param_list:
   type ident

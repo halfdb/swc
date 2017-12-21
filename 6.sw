@@ -8,4 +8,4 @@ int f(int n) {
 }
 print("input the n");
 read(n);
-print (call f(n));
+print(call f(call f(n)));

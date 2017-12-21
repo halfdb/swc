@@ -3,7 +3,7 @@ int i;
 int i;
 kk l;
 
-int f(j l, int y) {};
+int f(j l, int y);
 
 print(4);
 i /= 4;

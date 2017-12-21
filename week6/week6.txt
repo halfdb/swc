@@ -1,0 +1,24 @@
+bool a; //根据自己实际情况调整
+bool b;
+bool c;
+var d;
+var e;
+read(d);
+read(e);
+d = d%e;
+print(d);
+
+a = True;
+b = False;
+
+if a {
+   c = a and b;
+}else{
+   c = a or b;
+};
+
+print(c);
+
+c = not c;
+  
+print(c);

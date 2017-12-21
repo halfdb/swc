@@ -1,0 +1,16 @@
+var b;
+func func1(){
+ var a;
+ a=1;
+ print(a);
+ }
+
+func func2(){
+ print(b);
+ print(a);
+}
+
+b = 2;
+call func1();
+call func2();
+

@@ -16,11 +16,9 @@ int f(int n) {
   }
   return b;
 }
-/*
 for n in 0...11 {
 print("f ", n, " is ", call f(n));
 }
-*/
 n=1;
 while (n != 0) {
 print("f ", n, " is ", call f(n));
