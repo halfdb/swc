@@ -55,11 +55,6 @@ typedef struct {
 typedef enum {
   ADD, SUB, OPP,
   MUL, DIV, MOD,
-  /*
-  ADDF, SUBF, OPPF,
-  MULF, DIVF,
-  ITOF, FTOI,
-  */
   NOT, AND, OR,
   GT, LT, GE, LE,
   EQ, NEQ
@@ -81,7 +76,6 @@ void init_machine();
 void close_machine();
 int start_program(instruction *instructions, void *static_area);
 void interpret(instruction ins, void *static_area);
-void runtime_error(char* error);
 
 #define MACHINE_H
 #endif

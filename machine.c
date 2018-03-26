@@ -20,6 +20,7 @@ status_enum status = UNINITIALIZED;
 
 static void _assign(data_item *dest_item, const data_item *item);
 static data_item *_locate(unsigned long scope, unsigned long var_no);
+static void runtime_error(char* error);
 
 void init_machine() {
   if (data_stack != NULL) {

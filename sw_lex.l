@@ -18,7 +18,7 @@ NUMBER  {DIGIT}+
 IDENT   ({LETTER}|_)({LETTER}|{DIGIT}|_)*
 
 %%
-[\t\n \r]             { }
+[\t\n \r]           { }
 "/*"(.|\n)*"*/"     { }
 "//".*$             { }
 \"[^\"]*\"          {
@@ -57,11 +57,11 @@ IDENT   ({LETTER}|_)({LETTER}|{DIGIT}|_)*
 "print"             { return PRINTSYM; }
 "call"              { return CALLSYM; }
 "return"            { return RETSYM; }
-"true"|"True"              { return TRUESYM; }
-"false"|"False"             { return FALSESYM; }
-"&&"|"and"                { return ANDSYM; }
-"||"|"or"                { return ORSYM; }
-!|！|"not"                { return NOTSYM; }
+"true"|"True"       { return TRUESYM; }
+"false"|"False"     { return FALSESYM; }
+"&&"|"and"          { return ANDSYM; }
+"||"|"or"           { return ORSYM; }
+!|！|"not"          { return NOTSYM; }
 \(|（               { return LPASYM; }
 \)|）               { return RPASYM; }
 \{                  { return LBRSYM; }
@@ -79,8 +79,8 @@ IDENT   ({LETTER}|_)({LETTER}|{DIGIT}|_)*
 "for"               { return FORSYM; }
 "in"                { return INSYM; }
 "..."|".."          { return ELLIPSYM; }
-"void"|"func"              { yylval.var.type = VOID; return VOIDSYM; }
-"int"|"var"               { yylval.var.type = INT; return INTSYM; }
+"void"|"func"       { yylval.var.type = VOID; return VOIDSYM; }
+"int"|"var"         { yylval.var.type = INT; return INTSYM; }
 "bool"              {
                       yylval.var.type = BOOL;
                       return BOOLSYM;

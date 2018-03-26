@@ -30,9 +30,6 @@ void init_table();
 void close_table(char clean);
 
 /* tables */
-/* variable table */
-//#define VAR_TABLE_SIZE ((1<<16)-1)
-
 /* function table */
 #define FUNC_TABLE_SIZE ((1<<24)-1) // by items
 func_item *func_table;
